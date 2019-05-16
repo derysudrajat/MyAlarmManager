@@ -108,7 +108,12 @@ public class AlarmReceiver extends BroadcastReceiver {
                 .setVibrate(new long[]{1000, 1000, 1000, 1000, 1000})
                 .setSound(alarmSound);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
+        Notification notification = builder.build();
+
+        if (notificationManagerCompat != null) {
+            notificationManagerCompat.notify(notifId, notification);
+        }        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
                     CHANNEL_NAME,
@@ -124,11 +129,6 @@ public class AlarmReceiver extends BroadcastReceiver {
             }
         }
 
-        Notification notification = builder.build();
-
-        if (notificationManagerCompat != null) {
-            notificationManagerCompat.notify(notifId, notification);
-        }
     }
     private String DATE_FORMAT = "yyyy-MM-dd";
     private String TIME_FORMAT = "HH:mm";
@@ -155,6 +155,19 @@ public class AlarmReceiver extends BroadcastReceiver {
         }
 
         Toast.makeText(context, "Repeating alarm set up", Toast.LENGTH_SHORT).show();
+    }
+    public void cancelAlarm(Context context, String type) {
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(context, AlarmReceiver.class);
+        int requestCode = type.equalsIgnoreCase(TYPE_ONE_TIME) ? ID_ONETIME : ID_REPEATING;
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, requestCode, intent, 0);
+        pendingIntent.cancel();
+
+        if (alarmManager != null) {
+            alarmManager.cancel(pendingIntent);
+        }
+
+        Toast.makeText(context, "Repeating alarm dibatalkan", Toast.LENGTH_SHORT).show();
     }
 
 }
