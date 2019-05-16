@@ -7,18 +7,24 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.TimePicker;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, DatePickerFragment.DialogDateListener, TimePickerFragment.DialogTimeListener  {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, DatePickerFragment.DialogDateListener, TimePickerFragment.DialogTimeListener {
     TextView tvOnceDate;
     TextView tvOnceTime;
     EditText edtOnceMessage;
     ImageButton btnOnceDate;
     ImageButton btnOnceTime;
     Button btnSetOnce;
+
+    TextView tvRepeatingTime;
+    EditText edtRepeatingMessage;
+    ImageButton btnRepeatingTime;
+    Button btnSetRepeating;
 
     private AlarmReceiver alarmReceiver;
 
@@ -38,9 +44,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         edtOnceMessage = findViewById(R.id.edt_once_message);
         btnSetOnce = findViewById(R.id.btn_set_once_alarm);
 
+        tvRepeatingTime = findViewById(R.id.tv_repeating_time);
+        btnRepeatingTime = findViewById(R.id.btn_repeating_time);
+        edtRepeatingMessage = findViewById(R.id.edt_repeating_message);
+        btnSetRepeating = findViewById(R.id.btn_set_repeating_alarm);
+
         btnOnceDate.setOnClickListener(this);
         btnOnceTime.setOnClickListener(this);
         btnSetOnce.setOnClickListener(this);
+
+        btnRepeatingTime.setOnClickListener(this);
+        btnSetRepeating.setOnClickListener(this);
 
         alarmReceiver = new AlarmReceiver();
     }
@@ -66,8 +80,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         onceTime,
                         onceMessage);
                 break;
+            case R.id.btn_repeating_time:
+                TimePickerFragment timePickerFragmentRepeat = new
+                        TimePickerFragment();
+                timePickerFragmentRepeat.show(getSupportFragmentManager(),
+                        TIME_PICKER_REPEAT_TAG);
+                break;
+            case R.id.btn_set_repeating_alarm:
+                String repeatTime = tvRepeatingTime.getText().toString();
+                String repeatMessage = edtRepeatingMessage.getText().toString();
+
+                alarmReceiver.setRepeatingAlarm(this, AlarmReceiver.TYPE_REPEATING,
+                        repeatTime, repeatMessage);
+                break;
         }
     }
+
     @Override
     public void onDialogDateSet(String tag, int year, int month, int dayOfMonth) {
         Calendar calendar = Calendar.getInstance();
@@ -75,6 +103,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
         tvOnceDate.setText(dateFormat.format(calendar.getTime()));
+
     }
 
     @Override
@@ -88,6 +117,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (tag) {
             case TIME_PICKER_ONCE_TAG:
                 tvOnceTime.setText(dateFormat.format(calendar.getTime()));
+                break;
+            case TIME_PICKER_REPEAT_TAG:
+                tvRepeatingTime.setText(dateFormat.format(calendar.getTime()));
                 break;
             default:
                 break;
